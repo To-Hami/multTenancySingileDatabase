@@ -15,11 +15,7 @@ use Illuminate\Validation\Rules;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view.
-     *
-     * @return \Illuminate\View\View
-     */
+
     public function create()
     {
         $invitationEmail = null;
@@ -37,12 +33,13 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['sometime', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => ['sometimes', 'string', 'email', 'max:255', 'unique:users'],
+            'subdomain' => 'string|alpha|required|unique:tenants,subdomain',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $email = $request->email;
-
+        $invitation = null;
         if (request('token')) {
             $invitation = Invitation::with('tenant')->
             where('token', request('token'))->first();
@@ -70,13 +67,19 @@ class RegisteredUserController extends Controller
 
         }
 
-        $tenant = Tenant::create(['name' => $request->name . ' Tenant']);
+        $tenant = Tenant::create([
+            'name' => $request->name . ' Tenant',
+            'subdomain'=>$request->subdomain
+        ]);
         event(new Registered($user));
         Auth::login($user);
 
         $tenant->users()->attach(auth()->id(), ['is_owner' => true]);
         $user->update(['current_tenant_id' => $tenant->id]);
 
-        return redirect(RouteServiceProvider::HOME);
+//        return redirect(RouteServiceProvider::HOME);
+
+        return redirect('http://' . $request->subdomain .'.' . 'localhost:8000' . RouteServiceProvider::HOME);
+
     }
 }

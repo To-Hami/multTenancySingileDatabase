@@ -61,6 +61,16 @@
                 <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2"/>
             </div>
 
+                <!-- subdomain -->
+                <div class="mt-4">
+                    <x-input-label for="name" :value="__('Subdomain')"/>
+
+                    <x-text-input id="subdomain" class="block mt-1 w-full" type="text" name="subdomain" :value="old('subdomain')" required
+                    />
+
+                    <x-input-error :messages="$errors->get('subdomain')" class="mt-2"/>
+                </div>
+
             <div class="flex items-center justify-end mt-4">
                 <a class="underline text-sm text-gray-600 hover:text-gray-900" href="{{ route('login') }}">
                     {{ __('Already registered?') }}
